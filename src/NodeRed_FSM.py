@@ -20,6 +20,58 @@ class NodeRed_FSM:
     self.data = open(self.input_file_path, "r")
     self.FSM_as_Dict = json.loads(self.data.read())
 
+  def validate(self):
+    """Validate the loaded FSM definition.
+    Returns a list of error strings. Empty list means valid."""
+    errors = []
+
+    # Check top-level keys
+    if "state" not in self.FSM_as_Dict:
+      errors.append("Missing top-level key: 'state'")
+    if "transitions" not in self.FSM_as_Dict:
+      errors.append("Missing top-level key: 'transitions'")
+    if errors:
+      return errors  # Can't continue without these
+
+    # Check state structure
+    state = self.FSM_as_Dict["state"]
+    if "status" not in state:
+      errors.append("'state' object is missing 'status' key")
+
+    # Check transitions is non-empty dict
+    transitions = self.FSM_as_Dict["transitions"]
+    if not isinstance(transitions, dict) or len(transitions) == 0:
+      errors.append("'transitions' must be a non-empty object")
+      return errors  # Can't continue
+
+    # Check each transition entry has "status"
+    for source_state, triggers in transitions.items():
+      if not isinstance(triggers, dict):
+        errors.append(f"Transitions for state '{source_state}' must be an object")
+        continue
+      for trigger_name, trigger_data in triggers.items():
+        if not isinstance(trigger_data, dict) or "status" not in trigger_data:
+          errors.append(f"Transition '{source_state}' -> '{trigger_name}' is missing 'status' key")
+
+    # Check initial state exists in transitions
+    if "status" in state:
+      initial_state = state["status"]
+      if initial_state not in transitions:
+        errors.append(f"Initial state '{initial_state}' not found in transitions")
+
+    # Check all target states exist as source states
+    defined_states = set(transitions.keys())
+    for source_state, triggers in transitions.items():
+      if not isinstance(triggers, dict):
+        continue
+      for trigger_name, trigger_data in triggers.items():
+        if isinstance(trigger_data, dict) and "status" in trigger_data:
+          target = trigger_data["status"]
+          if target not in defined_states:
+            errors.append(f"Target state '{target}' (from '{source_state}' via '{trigger_name}') is not defined in transitions")
+
+    return errors
+
   def getFSM_as_dict(self):
     return self.FSM_as_Dict
 

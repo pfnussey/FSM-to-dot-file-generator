@@ -26,6 +26,12 @@ if len(sys.argv) > 1:
     input_file_path = inputFilePath + inputfileName
     FSM = NodeRed_FSM(FSM_Name, input_file_path)
     FSM.load_FSM_Definition()
+    errors = FSM.validate()
+    if errors:
+        print("Validation failed:")
+        for e in errors:
+            print("  - " + e)
+        sys.exit(1)
     FSM.buildDotFile()
 else:
     # GUI mode

@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from datetime import datetime
 from NodeRed_FSM import NodeRed_FSM
 
@@ -120,6 +120,12 @@ class FSMGeneratorGUI:
     try:
       fsm = NodeRed_FSM(fsm_name, input_path, output_path)
       fsm.load_FSM_Definition()
+      errors = fsm.validate()
+      if errors:
+        error_text = "\n".join(errors)
+        messagebox.showerror("Validation Failed", error_text)
+        self.status_var.set("Validation failed: " + str(len(errors)) + " error(s)")
+        return
       fsm.buildDotFile()
       self.status_var.set("Success: " + output_path)
     except Exception as e:
