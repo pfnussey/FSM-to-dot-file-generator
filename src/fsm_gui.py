@@ -41,6 +41,16 @@ class FSMGeneratorGUI:
     tk.Entry(output_frame, textvariable=self.output_var, width=50).pack(side=tk.LEFT, fill=tk.X, expand=True)
     tk.Button(output_frame, text="Browse...", command=self.browse_output_file).pack(side=tk.RIGHT, padx=(5, 0))
 
+    # User Notes
+    tk.Label(root, text="Notes:", anchor=tk.W).pack(fill=tk.X, padx=10, pady=(10, 0))
+    notes_frame = tk.Frame(root)
+    notes_frame.pack(fill=tk.X, padx=10, pady=2)
+    notes_scrollbar = tk.Scrollbar(notes_frame, orient=tk.VERTICAL)
+    self.notes_text = tk.Text(notes_frame, height=4, wrap=tk.WORD, yscrollcommand=notes_scrollbar.set)
+    notes_scrollbar.config(command=self.notes_text.yview)
+    self.notes_text.pack(side=tk.LEFT, fill=tk.X, expand=True)
+    notes_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
     # Generate button
     tk.Button(root, text="Generate", command=self.generate, width=15).pack(pady=15)
 
@@ -117,6 +127,8 @@ class FSMGeneratorGUI:
       self.status_var.set("Error: No output file specified.")
       return
 
+    user_notes = self.notes_text.get("1.0", tk.END).strip()
+
     try:
       fsm = NodeRed_FSM(fsm_name, input_path, output_path)
       fsm.load_FSM_Definition()
@@ -126,7 +138,7 @@ class FSMGeneratorGUI:
         messagebox.showerror("Validation Failed", error_text)
         self.status_var.set("Validation failed: " + str(len(errors)) + " error(s)")
         return
-      fsm.buildDotFile()
+      fsm.buildDotFile(user_notes)
       self.status_var.set("Success: " + output_path)
     except Exception as e:
       self.status_var.set("Error: " + str(e))
