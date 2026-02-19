@@ -1,4 +1,4 @@
-# Originally written in early 2025 but published to GitHub repo 17/02/2026
+# Originally written in early 2025 but published to GitHub repo 17/02/2026.
 
 import json
 import os
@@ -117,7 +117,8 @@ class NodeRed_FSM:
     transition_count = sum(len(v) for v in transitions_dict.values() if isinstance(v, dict))
     initial_state = self.FSM_as_Dict["state"].get("status", "unknown")
     source_file = os.path.basename(self.input_file_path)
-    dotCommand = "dot file command line format: dot -Tpdf <inputfile>.dot -o <outputfile>.pdf"
+    pdf_file_path = os.path.splitext(self.dotFileName)[0] + ".pdf"
+    dotCommand = 'dot -Tpdf \\"' + self.dotFileName + '\\" -o \\"' + pdf_file_path + '\\"'
 
     fileHeader = (newline + title + newline +
                   "Author: " + author + newline +

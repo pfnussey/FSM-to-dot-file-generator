@@ -8,7 +8,7 @@ from NodeRed_FSM import NodeRed_FSM
 # Originally written in early 2025 but published to GitHub repo 17/02/2026
 
 
-VERSION = "Source file: makeDotFile.py Ver 1.1"
+VERSION = "Source file: makeDotFile.py Ver 2.0"
 USAGE = "Usage: makeDotFile \"working_directory\" \"JSON file name\" \"FSM name\""
 
 if len(sys.argv) > 1:
