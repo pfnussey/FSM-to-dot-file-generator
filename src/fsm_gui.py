@@ -6,6 +6,26 @@ from NodeRed_FSM import NodeRed_FSM
 
 VERSION = "Author: Peter Nussey\nver2.0, 20/02/2026"
 
+ABOUT_TEXT = (
+    "This utility program has been written to assist the user in developing "
+    "Finite State Machine (FSM) definitions for Node-Red by providing a "
+    "conversion between the raw JSON format used by Node-Red and a graphical "
+    "state diagram representation generated from Graphviz. The FSM to DOT "
+    "File Generator takes as input a JSON file which defines the FSM and "
+    "converts it to a .dot file which can be used by Graphviz to draw a "
+    "state diagram of the FSM.\n\n"
+    "A typical workflow incorporating this tool is shown below:\n\n"
+    "1. Write a JSON file to describe the desired FSM.\n"
+    "2. Use the FSM to DOT File Generator to convert this file to a Graphviz "
+    ".dot file.\n"
+    "3. Run the dot command from Graphviz with the generated .dot file as "
+    "input to generate a PDF representation of the FSM state diagram.\n"
+    "4. Test the FSM and refer to the state diagram to assist with further "
+    "development and debugging of the FSM.\n"
+    "5. Update the JSON file as required.\n"
+    "6. Repeat steps 2 - 5 until a satisfactory FSM has been developed."
+)
+
 class FSMGeneratorGUI:
   def __init__(self, root):
     self.root = root
@@ -17,6 +37,7 @@ class FSMGeneratorGUI:
     title_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
     tk.Label(title_frame, text="FSM to DOT File Generator", font=("Helvetica", 12, "bold")).pack(side=tk.LEFT)
     tk.Label(title_frame, text=VERSION, font=("Helvetica", 10), justify=tk.RIGHT).pack(side=tk.RIGHT)
+    tk.Button(title_frame, text="About", command=self.show_about).pack(side=tk.RIGHT, padx=(0, 10))
 
     # Input JSON File
     tk.Label(root, text="Input JSON File:", anchor=tk.W).pack(fill=tk.X, padx=10, pady=(10, 0))
@@ -74,6 +95,26 @@ class FSMGeneratorGUI:
     tk.Label(root, textvariable=self.status_var, anchor=tk.W, relief=tk.SUNKEN).pack(fill=tk.X, padx=10, pady=(10, 10))
 
     self._auto_update_output = True
+
+  def show_about(self):
+    win = tk.Toplevel(self.root)
+    win.title("About FSM to DOT File Generator")
+    win.resizable(False, False)
+    win.grab_set()  # modal
+
+    text = tk.Text(win, wrap=tk.WORD, width=60, height=18, padx=10, pady=10,
+                   relief=tk.FLAT)
+    text.insert(tk.END, ABOUT_TEXT)
+    text.config(state=tk.DISABLED)
+    text.pack(padx=10, pady=(10, 0))
+
+    tk.Button(win, text="OK", command=win.destroy, width=10).pack(pady=10)
+
+    # Centre the dialog over the parent window
+    win.update_idletasks()
+    x = self.root.winfo_x() + (self.root.winfo_width()  - win.winfo_width())  // 2
+    y = self.root.winfo_y() + (self.root.winfo_height() - win.winfo_height()) // 2
+    win.geometry(f"+{x}+{y}")
 
   def _build_output_path(self):
     """Build auto-suggested output path from input dir and FSM name."""
