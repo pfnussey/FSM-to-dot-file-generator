@@ -1,11 +1,30 @@
+"""Entry point for the FSM to DOT File Generator.
+
+Runs in CLI mode when command-line arguments are supplied, or launches
+the Tkinter GUI otherwise.
+
+CLI usage::
+
+    makeDotFile <working_directory> <json_file_name> <fsm_name>
+
+Command-line arguments (CLI mode):
+    argv[1] (str): Path to the directory containing the JSON input file.
+    argv[2] (str): Filename of the JSON input file (within that directory).
+    argv[3] (str): Name to assign to the FSM.
+
+Note:
+    Docstrings in this file use Google style and are intended to be
+    processed by Sphinx with the Napoleon extension (sphinx.ext.napoleon).
+
+Originally written in early 2025, published to GitHub repo 17/02/2026.
+
+To compile to a single executable use PyInstaller::
+
+    pyinstaller makeDotFile.py --onefile --name makeDotFile_v2.0
+"""
 
 import sys
 from NodeRed_FSM import NodeRed_FSM
-
-
-# To compile this program to a single .exe file use the following command (with the version number updated appropriately
-# C:\Users\pfnus\PycharmProjects\PFN Testing>pyinstaller makeDotFile.py --onefile --name makeDotFile_v1.0
-# Originally written in early 2025 but published to GitHub repo 17/02/2026
 
 
 VERSION = "Source file: makeDotFile.py Ver 2.0"

@@ -1,3 +1,16 @@
+"""Tkinter GUI for the FSM to DOT File Generator.
+
+Provides the :class:`FSMGeneratorGUI` class, which builds the main application
+window and handles user interaction for selecting input/output files, entering
+an FSM name and optional notes, and triggering ``.dot`` file generation.
+
+Note:
+    Docstrings in this file use Google style and are intended to be
+    processed by Sphinx with the Napoleon extension (sphinx.ext.napoleon).
+
+Originally written in early 2025, published to GitHub repo 17/02/2026.
+"""
+
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -27,7 +40,31 @@ ABOUT_TEXT = (
 )
 
 class FSMGeneratorGUI:
+  """Main application window for the FSM to DOT File Generator.
+
+  Builds and manages the Tkinter GUI, including file selection widgets,
+  an FSM name entry, a user notes area, a Generate button, and read-only
+  output fields showing the derived PDF path and Graphviz dot command.
+
+  Attributes:
+      root (tk.Tk): The root Tkinter window.
+      input_var (tk.StringVar): Holds the path to the input JSON file.
+      name_var (tk.StringVar): Holds the FSM name.
+      output_var (tk.StringVar): Holds the path for the output ``.dot`` file.
+      pdf_var (tk.StringVar): Derived PDF output path (auto-updated from
+          ``output_var``).
+      dot_command_var (tk.StringVar): Graphviz dot command string
+          (auto-updated from ``output_var`` and ``pdf_var``).
+      notes_text (tk.Text): Multi-line text widget for optional user notes.
+      status_var (tk.StringVar): Status bar message.
+  """
+
   def __init__(self, root):
+    """Initialise the GUI and build all widgets.
+
+    Args:
+        root (tk.Tk): The root Tkinter window to build the GUI into.
+    """
     self.root = root
     self.root.title("FSM to DOT File Generator")
     self.root.resizable(False, False)
@@ -97,6 +134,7 @@ class FSMGeneratorGUI:
     self._auto_update_output = True
 
   def show_about(self):
+    """Display the About dialog as a modal window centred over the main window."""
     win = tk.Toplevel(self.root)
     win.title("About FSM to DOT File Generator")
     win.resizable(False, False)
@@ -117,7 +155,12 @@ class FSMGeneratorGUI:
     win.geometry(f"+{x}+{y}")
 
   def _build_output_path(self):
-    """Build auto-suggested output path from input dir and FSM name."""
+    """Build an auto-suggested output ``.dot`` path from the input directory and FSM name.
+
+    Returns:
+        str: The suggested output path, or an empty string if either the
+        input file path or FSM name is not yet set.
+    """
     input_path = self.input_var.get()
     fsm_name = self.name_var.get()
     if input_path and fsm_name:
@@ -127,18 +170,40 @@ class FSMGeneratorGUI:
     return ""
 
   def _on_input_changed(self, *args):
-    """When input file changes, auto-fill FSM name from filename stem."""
+    """Trace callback: when the input file path changes, auto-fill the FSM name.
+
+    If the new path points to an existing file, the FSM name field is
+    populated with the filename stem (i.e. the basename without extension).
+
+    Args:
+        *args: Positional arguments supplied by the Tkinter trace mechanism
+            (name, index, mode); not used directly.
+    """
     input_path = self.input_var.get()
     if input_path and os.path.isfile(input_path):
       stem = os.path.splitext(os.path.basename(input_path))[0]
       self.name_var.set(stem)
 
   def _on_name_changed(self, *args):
-    """When FSM name changes, update the auto-suggested output path."""
+    """Trace callback: when the FSM name changes, update the auto-suggested output path.
+
+    Only updates the output path while :attr:`_auto_update_output` is
+    ``True``; auto-update is disabled once the user manually selects an
+    output file via the Browse dialog.
+
+    Args:
+        *args: Positional arguments supplied by the Tkinter trace mechanism;
+            not used directly.
+    """
     if self._auto_update_output:
       self.output_var.set(self._build_output_path())
 
   def browse_input_file(self):
+    """Open a file-chooser dialog to select the input JSON file.
+
+    On confirmation, sets :attr:`input_var` to the chosen path, which in
+    turn triggers :meth:`_on_input_changed` to auto-fill the FSM name.
+    """
     filepath = filedialog.askopenfilename(
       title="Select Input JSON File",
       filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
@@ -147,6 +212,12 @@ class FSMGeneratorGUI:
       self.input_var.set(filepath)
 
   def browse_output_file(self):
+    """Open a save-as dialog to choose the output ``.dot`` file path.
+
+    Pre-populates the dialog with the current output path if one is already
+    set. On confirmation, disables auto-update of the output path and sets
+    :attr:`output_var` to the chosen path.
+    """
     initial_dir = ""
     initial_file = ""
     current_output = self.output_var.get()
@@ -166,7 +237,15 @@ class FSMGeneratorGUI:
       self.output_var.set(filepath)
 
   def _on_output_dot_changed(self, *args):
-    """When DOT output path changes, auto-update PDF output path."""
+    """Trace callback: when the ``.dot`` output path changes, update the PDF path.
+
+    Sets :attr:`pdf_var` to the same path with the extension replaced by
+    ``.pdf``, or clears it if the dot path is empty.
+
+    Args:
+        *args: Positional arguments supplied by the Tkinter trace mechanism;
+            not used directly.
+    """
     dot_path = self.output_var.get()
     if dot_path:
       self.pdf_var.set(os.path.splitext(dot_path)[0] + ".pdf")
@@ -174,7 +253,15 @@ class FSMGeneratorGUI:
       self.pdf_var.set("")
 
   def _on_pdf_changed(self, *args):
-    """When PDF output path changes, update the dot command."""
+    """Trace callback: when the PDF path changes, rebuild the dot command string.
+
+    Sets :attr:`dot_command_var` to the ready-to-run Graphviz command, or
+    clears it if either path is empty.
+
+    Args:
+        *args: Positional arguments supplied by the Tkinter trace mechanism;
+            not used directly.
+    """
     dot_path = self.output_var.get()
     pdf_path = self.pdf_var.get()
     if dot_path and pdf_path:
@@ -183,13 +270,25 @@ class FSMGeneratorGUI:
       self.dot_command_var.set("")
 
   def copy_dot_command(self):
-    """Copy the dot command to the clipboard."""
+    """Copy the current dot command string to the system clipboard."""
     cmd = self.dot_command_var.get()
     if cmd:
       self.root.clipboard_clear()
       self.root.clipboard_append(cmd)
 
   def generate(self):
+    """Validate inputs and generate the ``.dot`` file.
+
+    Reads the input file path, FSM name, output path, and optional notes
+    from the GUI widgets. Performs basic field validation, then delegates
+    to :class:`~NodeRed_FSM.NodeRed_FSM` to load, validate, and write the
+    ``.dot`` file. Updates :attr:`status_var` with the outcome.
+
+    On success, the status bar shows the output file path.
+    On validation failure, a modal error dialog lists the validation errors
+    and the status bar shows the error count.
+    On any other exception, the status bar shows the exception message.
+    """
     input_path = self.input_var.get().strip()
     fsm_name = self.name_var.get().strip()
     output_path = self.output_var.get().strip()
