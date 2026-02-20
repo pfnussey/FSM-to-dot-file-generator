@@ -4,7 +4,7 @@ from tkinter import filedialog, messagebox
 from datetime import datetime
 from NodeRed_FSM import NodeRed_FSM
 
-VERSION = "v2.0"
+VERSION = "Author: Peter Nussey\nver2.0, 20/02/2026"
 
 class FSMGeneratorGUI:
   def __init__(self, root):
@@ -16,7 +16,7 @@ class FSMGeneratorGUI:
     title_frame = tk.Frame(root)
     title_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
     tk.Label(title_frame, text="FSM to DOT File Generator", font=("Helvetica", 12, "bold")).pack(side=tk.LEFT)
-    tk.Label(title_frame, text=VERSION, font=("Helvetica", 10)).pack(side=tk.RIGHT)
+    tk.Label(title_frame, text=VERSION, font=("Helvetica", 10), justify=tk.RIGHT).pack(side=tk.RIGHT)
 
     # Input JSON File
     tk.Label(root, text="Input JSON File:", anchor=tk.W).pack(fill=tk.X, padx=10, pady=(10, 0))
